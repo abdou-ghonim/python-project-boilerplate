@@ -93,7 +93,8 @@ class UserBehaviour:
                 "This user table has no password column (AUTH_USER_COLUMNS says "
                 "password_hash is absent), so passwords cannot be set here. Use "
                 "AUTH_PROVIDER=oidc, or point AUTH_USER_COLUMNS at the real one.")
-        if len(password) < config.PASSWORD_MIN_LENGTH:
+        # only enforce the minimum length in production, so the seeded admin can be created with a placeholder password
+        if config.ENVIRONMENT == "production" and len(password) < config.PASSWORD_MIN_LENGTH:
             raise ValueError(
                 f"Password must be at least {config.PASSWORD_MIN_LENGTH} characters.")
         self.password_hash = generate_password_hash(password)
