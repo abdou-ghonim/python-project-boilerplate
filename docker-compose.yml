@@ -1,0 +1,108 @@
+# Development stack: app + worker + Redis, with a database service per provider.
+#
+#   docker compose up --build            app, worker and Redis (sqlite file)
+#   docker compose --profile postgresql up --build
+#
+# Switching database: set DB_PROVIDER in .env, enable the matching profile, and
+# rebuild with --build-arg DB_PROVIDER=<provider> so the driver is in the image.
+services:
+  app:
+    build:
+      context: .
+      args:
+        DB_PROVIDER: ${DB_PROVIDER:-sqlite}
+        WITH_OIDC: ${WITH_OIDC:-false}
+    ports:
+      - "${APP_PORT:-5000}:5000"
+    env_file: [.env]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DB_HOST: ${DB_HOST:-db}
+    volumes:
+      # Logs on the host, so they survive the container.
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      args:
+        DB_PROVIDER: ${DB_PROVIDER:-sqlite}
+    command: ["flask", "jobs", "worker"]
+    env_file: [.env]
+    environment:
+      FLASK_APP: run.py
+      REDIS_URL: redis://redis:6379/0
+      DB_HOST: ${DB_HOST:-db}
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    # appendonly keeps the rate-limit and revocation state across a restart.
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ── Database services. Each is behind a profile, so only the one you use runs.
+  db-postgresql:
+    profiles: ["postgresql"]
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-app}
+      POSTGRES_USER: ${DB_USER:-app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-app}
+    ports: ["5432:5432"]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-mysql:
+    profiles: ["mysql"]
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-app}
+      MYSQL_USER: ${DB_USER:-app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-app}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-app}
+    ports: ["3306:3306"]
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  db-mssql:
+    profiles: ["mssql"]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${DB_PASSWORD:-Str0ng!Passw0rd}
+    ports: ["1433:1433"]
+    volumes:
+      - mssql-data:/var/opt/mssql
+
+volumes:
+  redis-data:
+  postgres-data:
+  mysql-data:
+  mssql-data:

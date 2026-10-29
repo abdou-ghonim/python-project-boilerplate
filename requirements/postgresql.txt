@@ -1,0 +1,2 @@
+# DB_PROVIDER=postgresql
+psycopg[binary]>=3.1

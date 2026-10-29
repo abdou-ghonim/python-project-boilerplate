@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* Tailwind v4 has no JS config file: the dark variant and the theme are both
+   declared here. `dark:` applies when .dark is on a parent — we toggle it on
+   <html> rather than following the OS, so the choice survives a reload. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens. Anything referencing var(--color-*) flips with the theme,
+   so a component never needs to know which theme is active. */
+:root {
+  color-scheme: light;
+  --color-bg:            #f8fafc;
+  --color-surface:       #ffffff;
+  --color-border:        #e2e8f0;
+  --color-text:          #0f172a;
+  --color-text-muted:    #64748b;
+  --color-primary:       #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-fg:    #ffffff;
+  --color-success:       #16a34a;
+  --color-warning:       #d97706;
+  --color-danger:        #dc2626;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --color-bg:            #0b1120;
+  --color-surface:       #111827;
+  --color-border:        #1f2937;
+  --color-text:          #e5e7eb;
+  --color-text-muted:    #94a3b8;
+  --color-primary:       #3b82f6;
+  --color-primary-hover: #60a5fa;
+  --color-primary-fg:    #0b1120;
+  --color-success:       #22c55e;
+  --color-warning:       #f59e0b;
+  --color-danger:        #ef4444;
+}
+
+/* Expose the tokens to Tailwind utilities: bg-surface, text-muted, border-base… */
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-base: var(--color-border);
+  --color-body: var(--color-text);
+  --color-muted: var(--color-text-muted);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-fg: var(--color-primary-fg);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Two component classes, because these three utilities repeat on every page.
+   Everything else stays inline, where it is readable next to the markup. */
+@layer components {
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+  }
+  .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-primary-fg);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: background 120ms ease;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+  .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+}

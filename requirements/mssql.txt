@@ -1,0 +1,4 @@
+# DB_PROVIDER=mssql
+# Needs the Microsoft ODBC driver on the host as well as this package; the
+# Dockerfile installs it when DB_PROVIDER=mssql.
+pyodbc>=5.0

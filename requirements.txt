@@ -1,0 +1,12 @@
+# Core runtime. Database drivers are per-provider extras — install the one that
+# matches DB_PROVIDER from requirements/<provider>.txt.
+Flask>=3.0.0
+flask-cors>=4.0.0
+flask-sqlalchemy>=3.1.1
+SQLAlchemy>=2.0.0
+python-dotenv>=1.0.0
+PyJWT>=2.8                 # JWTs issued by every auth provider
+redis>=5.0                 # rate limiting, revocation, cache, locks, job broker
+rq>=2.0                    # background jobs (flask jobs worker)
+inflect>=6.0.0             # lib/sql_code_generate pluralises relationship names
+requests>=2.0.0

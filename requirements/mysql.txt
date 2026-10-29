@@ -1,0 +1,3 @@
+# DB_PROVIDER=mysql  (MySQL and MariaDB)
+PyMySQL>=1.1
+cryptography>=42.0         # required for MySQL 8's caching_sha2_password auth

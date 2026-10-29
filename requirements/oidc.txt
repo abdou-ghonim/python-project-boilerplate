@@ -1,0 +1,2 @@
+# AUTH_PROVIDER=oidc
+Authlib>=1.3

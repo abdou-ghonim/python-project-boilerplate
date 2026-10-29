@@ -1,0 +1,47 @@
+# --- Secrets / local config (NEVER bake into the image) ---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Node / frontend (rebuilt inside the image) ---
+frontend/node_modules/
+frontend/dist/
+node_modules/
+
+# --- Local state ---
+*.db
+*.sqlite3
+logs/
+
+# --- VCS / IDE / OS ---
+.git/
+.gitignore
+.github/
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# --- Docs and dev-only files ---
+docs/
+tests/
+README.md
+CLAUDE.md
+
+# --- Docker files themselves ---
+Dockerfile
+docker-compose*.yml
+.dockerignore
